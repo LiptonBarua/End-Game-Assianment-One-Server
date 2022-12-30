@@ -19,7 +19,8 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run(){
     try{
      const postCollection= client.db('EndGameAssianment1').collection('uploading');
-
+     const commentCollection= client.db('EndGameAssianment1').collection('comment');
+    
      
      app.post('/upload', async(req, res)=>{
         const upload= req.body;
@@ -33,45 +34,71 @@ async function run(){
         res.send(result)
      })
      
-  
-    app.post('/comment', async(req, res)=>{
-    const upload= req.body;
-        const result = await commentCollection.insertOne(upload);
-        res.send(result)
-    })
-
-//     app.patch("/upload/:id", async (req, res) => {
-//       const id = req.params.id;
-//       const comment = req.body.comment;
-//       const filter ={ _id: ObjectId(id) };
-//       const allComment = await postCollection.find(filter).toArray();
-//       const myComment = (allComment[0].comment)
-//       myComment.push(comment)
-//       const options = { upsert: true };
-//    const updateDoc = [{
-//       $set: { comment: myComment },
-//    }];
-//    const result = await postCollection.updateOne(
-//       filter,
-//       updateDoc,
-//       options
-//    );
-//    res.send(result);
-//   })
-  
-
-app.patch("/upload/:id", async(req, res)=>{
-   const id = req.params.id;
-  const comment = req.body.comment;
-  const filter={ _id:ObjectId(id) }
-  const updateDoc = {
-         $set: { 
-            comment: [comment]
-         },
-      }
-      const result = await postCollection.updateOne(filter,updateDoc);
+     app.get('/upload/:id', async(req, res)=>{
+      const id = req.params.id;
+      const query = {_id:ObjectId(id)};
+      const result = await postCollection.findOne(query);
       res.send(result)
+  })
+  
+   //  app.post('/comment', async(req, res)=>{
+   //  const upload= req.body;
+   //      const result = await commentCollection.insertOne(upload);
+   //      res.send(result)
+   //  })
+
+   //  app.get('/comment', async(req, res)=>{
+   //    const query={};
+   //    const result = await postCollection.find(query).toArray();
+   //    res.send(result)
+   // })
+    app.patch("/upload/:id", async (req, res) => {
+      const id = req.params.id;
+      const comment = req.body.comment;
+
+      const filter = { _id: ObjectId(id) };
+      const allComment = await postCollection.find(filter).toArray();
+      const myComment = (allComment[0].comment)
+      console.log(myComment)
+      myComment?.push(comment)
+      const options = { upsert: true };
+   const updateDoc = [{
+      $set: { comment: myComment },
+   }];
+   const result = await postCollection.updateOne(
+      filter,
+      updateDoc,
+      options
+   );
+   res.send(result);
+  })
+  
+  app.patch('/likes/:id', async (req, res) => {
+   const id = req.params.id;
+   const body = req.body.like;
+   const filter = { _id: ObjectId(id) };
+   const options = { upsert: true };
+   const update = { $set: { like: 0 } }
+   const result = await postCollection.updateOne(filter, update, options);
+  res.send(result);
 })
+
+
+// app.patch("/upload/:id", async(req, res)=>{
+//    const id = req.params.id;
+ 
+//   const comment= req.body.comment;
+// 
+//   const filter={ _id:ObjectId(id) }
+//   const options = { upsert: true };
+//   const updateDoc = {
+//          $set: { 
+//             comment: [comment]
+//          },
+//       }
+//       const result = await postCollection.updateOne(filter,updateDoc,options);
+//       res.send(result)
+// })
 
     }
     finally{
