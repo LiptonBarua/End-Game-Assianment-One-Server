@@ -75,10 +75,10 @@ async function run(){
   
   app.patch('/likes/:id', async (req, res) => {
    const id = req.params.id;
-   const body = req.body.like;
+   const like = req.body.like;
    const filter = { _id: ObjectId(id) };
    const options = { upsert: true };
-   const update = { $set: { like: 0 } }
+   const update = { $set: { like: like } }
    const result = await postCollection.updateOne(filter, update, options);
   res.send(result);
 })
